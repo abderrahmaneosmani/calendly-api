@@ -1,6 +1,7 @@
 import http from "http";
 import express, { Express } from "express";
 import morgan from "morgan";
+import routes from "../src/routes/meetings/meeting";
 const router: Express = express();
 
 const httpServer = http.createServer(router);
@@ -24,10 +25,7 @@ router.use((req, res, next) => {
 });
 
 /** Routes */
-router.use("/", (req: any, res: any) => {
-  res.send("hello");
-});
-
+router.use("/", routes);
 router.use((req, res, next) => {
   const error = new Error("not found");
   return res.status(404).json({
