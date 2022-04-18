@@ -2,6 +2,7 @@ import http from "http";
 import express, { Express } from "express";
 import morgan from "morgan";
 import routes from "../src/routes/meetings/meeting";
+import usersMeetingRoutes from "../src/routes/usersMeetings/usersMeetings";
 const router: Express = express();
 
 const httpServer = http.createServer(router);
@@ -25,6 +26,8 @@ router.use((req, res, next) => {
 });
 
 /** Routes */
+router.use("/", usersMeetingRoutes);
+
 router.use("/", routes);
 router.use((req, res, next) => {
   const error = new Error("not found");

@@ -1,5 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
@@ -10,10 +8,28 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id Int @id @default( autoincrement())
   email String
-  name String
-
+  name String 
+  userMeeting UserMeeting[]
 }
+
+model Meeting {
+  id Int @id @default( autoincrement())
+  title String
+  description String
+  startAt DateTime
+  endAt DateTime
+  createdBy Int
+  guestId Int
+  userMeetings UserMeeting[]
+  }
+  model UserMeeting{
+    id Int @id @default( autoincrement())
+    guestId  Int
+    meetingId Int
+    user User @relation(fields: [guestId],references: [id])
+    meeting Meeting @relation(fields: [meetingId],references: [id])
+
+  }
