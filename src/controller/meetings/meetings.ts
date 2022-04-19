@@ -32,13 +32,16 @@ const createMeeting = async (req: Request, res: Response) => {
     return { startAt, endAt };
   });
   const startDates = dates.map((date) => {
-    const check = getDifferenceTimeStart(
+    const checkStartTime = getDifferenceTimeStart(
       startAt as unknown as string,
+      endAt as unknown as string,
       date.startAt,
       date.endAt
     );
-    return check;
+    return checkStartTime;
   });
+  //const end time
+  console.log(startDates);
 
   const length = startDates.length;
   const lengthTime = startDates.map((start) => {
