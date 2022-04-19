@@ -6,6 +6,7 @@ export function getDifferenceTimeStart(time: string, start: any, final: any) {
   if (min1 === 0 || min2 === 0) return false;
   if (Math.sign(min1) === 1 && Math.sign(min2) === -1) return false;
   if (Math.sign(min1) === -1 && Math.sign(min2) === 1) return false;
+  else return true;
 
   return { min1, min2 };
 }

@@ -5,43 +5,81 @@ import { getDifferenceTimeStart } from "../../utils/checkTimes";
 
 //create meeting
 const createMeeting = async (req: Request, res: Response) => {
-  const body = req.body;
-  const addMeeting = await prisma.meeting.create({
-    data: body,
-  });
+  const { title, description, createdBy, guestId, startAt, endAt } = req.body;
+  const data = { title, description, createdBy, guestId, startAt, endAt };
+  //check if guest have meetings
+  const meetings = await getUsrMeetingById(guestId);
 
-  const guest1 = {
-    meetingId: addMeeting.id,
-    guestId: addMeeting.createdBy,
-  };
-  const guest2 = {
-    meetingId: addMeeting.id,
-    guestId: addMeeting.guestId,
-  };
-
-  const meetings = await getUsrMeetingById(guest1.guestId);
+  if (meetings.length === 0) {
+    const addMeeting = await prisma.meeting.create({
+      data: data,
+    });
+    const guest1 = {
+      meetingId: addMeeting.id,
+      guestId: addMeeting.createdBy,
+    };
+    const guest2 = {
+      meetingId: addMeeting.id,
+      guestId: addMeeting.guestId,
+    };
+    const addGuest1 = await addUserMeeting(guest1);
+    const addGuest2 = await addUserMeeting(guest2);
+  }
+  // if have meetings
   const dates = meetings.map((meeting) => {
     const startAt = meeting.meeting.startAt;
     const endAt = meeting.meeting.endAt;
     return { startAt, endAt };
   });
-  const check = dates.map((date) => {
-    const c = getDifferenceTimeStart(
-      addMeeting.startAt as unknown as string,
+  const startDates = dates.map((date) => {
+    const check = getDifferenceTimeStart(
+      startAt as unknown as string,
       date.startAt,
       date.endAt
     );
-    return c;
+    return check;
   });
 
-  //add user meeting
-  const addGuest1 = await addUserMeeting(guest1);
-  //add the guest
-  const addGuest2 = await addUserMeeting(guest2);
+  const length = startDates.length;
+  const lengthTime = startDates.map((start) => {
+    let sum = 0;
+    if (start === true) sum += 1;
+    return sum;
+  });
+  const sumFreeTime = lengthTime.reduce((ac, cur) => ac + cur, 0);
+  if (length === sumFreeTime && length !== 0) {
+    const addMeeting = await prisma.meeting.create({
+      data: data,
+    });
+    const guest1 = {
+      meetingId: addMeeting.id,
+      guestId: addMeeting.createdBy,
+    };
+    const guest2 = {
+      meetingId: addMeeting.id,
+      guestId: addMeeting.guestId,
+    };
+    const addGuest1 = await addUserMeeting(guest1);
+    const addGuest2 = await addUserMeeting(guest2);
+  } else {
+    throw new Error("please select another time");
+  }
+
+  //get meeting of guest to check if he have time free
+
   res.status(201).json({
-    data: check,
+    data: "",
   });
 };
+// else {
+// const addGuest1 = await addUserMeeting(guest1);
+// const addGuest2 = await addUserMeeting(guest2);
+// }
+
+//check start dates
+
+//add user meeting
+//add the guest
 
 //get all  meetings
 const getAllMeetings = async (req: Request, res: Response) => {
